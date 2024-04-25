@@ -28,6 +28,9 @@ ALSO
 <br>
 
 **arp -e**: FInd the unknown mac from ip address
+A -> all active internet connection <br>
+E - all active without servers <br>
+R- kernel IP routing table <br>
 
 <br>
 
