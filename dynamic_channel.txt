@@ -1,0 +1,138 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+int n,c;
+cout<<"Enter the no. of channels\n";
+cin>>n;
+cout<<"Enter the cluster size\n";
+cin>>c;
+srand(time(0));
+vector<int>v(n);
+//0 1 2 low
+//3 4 5 high
+for(int i=0; i<n; i++)
+v[i]=rand()%6;
+
+vector<int>chan(c);
+for(int i=0; i<c; i++)
+{
+cout<<"Enter the number of channels value:";
+cin>>chan[i];
+}
+int sum=accumulate(chan.begin(),chan.end(),0)-n;
+cout<<"Extra channels:"<<sum<<endl;
+cout<<"Channel Requirement List\n[";
+for(int i=0; i<c; i++)
+{
+cout<<chan[i]<<" ";
+}
+cout<<"]\n";
+for(; sum>=c; sum=sum-c)
+{
+for(int j=0; j<c; j++)
+chan[j]--;
+}
+vector<vector<int>>temp(c,vector<int>(2));
+for(int i=0; i<c; i++)
+{
+temp[i][0]=chan[i];
+temp[i][1]=i;
+}
+sort(temp.begin(),temp.end(),[](vector<int>&a,vector<int>&b) {
+return a[0]>b[0];
+});
+for(int i=0; sum>0; i++)
+{
+temp[i][0]--;
+sum--;
+}
+for(int i=0; i<temp.size(); i++)
+{
+chan[temp[i][1]]=temp[i][0];
+}
+cout<<"Channel Requirement List After Adjustment\n[";
+for(int i=0; i<c; i++)
+{
+cout<<chan[i]<<" ";
+}
+cout<<"]\n";
+vector<int>lowp;
+vector<int>highp;
+cout<<"The Low Priority Channels\n";
+for(int i=0; i<n; i++)
+{
+if(v[i]==0||v[i]==1||v[i]==2)
+{
+cout<<i+1<<" ";
+lowp.push_back(i+1);
+}
+}
+cout<<"\nThe High Priority Channels\n";
+for(int i=0; i<n; i++)
+{
+if(v[i]==3||v[i]==4||v[i]==5)
+{
+cout<<i+1<<" ";
+highp.push_back(i+1);
+}
+}
+int m=INT_MIN;
+for(int i=0; i<c; i++)
+{
+m=max(m,chan[i]);
+}
+vector<vector<string>>traffic(m,vector<string>(c,"0"));
+int h=0;
+int l=0;
+for(int j=0; j<c; j++)
+{
+   int ch=chan[j];
+   int hh;
+   int ll;
+   if(ch%2==0)
+   {
+   hh=ch/2;
+   ll=ch/2;
+   }
+   else
+   {
+       hh=ch/2 +1;
+       ll=ch/2;
+   }
+   
+   for(int i=0; i<m && i<chan[j]; i++)
+   {
+       if(hh==0)
+       {
+           if(ll==0)
+           break;
+           else
+{
+traffic[i][j]=to_string(lowp[l])+"L";
+ll--;
+l++;
+}
+       }
+       else
+       {
+           traffic[i][j]=to_string(highp[h])+"H";
+hh--;
+h++;
+       }
+   }
+
+}
+cout<<"\n\nThe Traffic Channel Matrix:"<<endl;
+cout<<"[\n";
+for(int i=0; i<traffic.size(); i++)
+{
+cout<<"[ ";
+for(int j=0; j<traffic[i].size(); j++)
+cout<<traffic[i][j]<<"\t";
+cout<<"]\n";
+}
+cout<<"]\n";
+return 0;
+}
