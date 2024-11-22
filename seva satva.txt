@@ -1,0 +1,505 @@
+Expts 2 3 4 7 10
+
+Expt 2
+
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+map < int, int > valid;
+for (int i = 0; i < 5; i++)
+for (int j = 0; j <= i; j++)
+valid[i * i + j * j + i * j] = 1;
+int c;
+int cl;
+cout << "Enter the no. of total channels: ";
+cin >> c;
+cout << "Enter the cluster size: ";
+cin >> cl;
+if (valid[cl] == 0) {
+cout << "Invalid Cluster Size! \nPlease Re-Enter thecluster size: ";
+cin >> cl;
+}
+int perc = 15;
+int mm = perc/cl;
+if(perc%cl!=0) {
+mm++;
+}
+vector < vector < int >> control;
+for (int i = 1; i <= cl; i++) {
+vector < int > temp;
+for (int j = i, ct = 0; ct < mm; j = j + cl, ct++) {
+if (j >= perc + 1)
+j = j - perc;
+temp.push_back(j);
+}
+control.push_back(temp);
+}
+cout << "The Control Channel Matrix:" << endl<<endl;
+for (int i = 0; i < control.size(); i++) {
+cout << "[ ";
+for (int j = 0; j < mm; j++)
+cout << control[i][j] << "\t";
+cout << "]\n";
+}
+cout<<endl<<endl;
+int n = ((c - perc - 1) / cl) + 1;
+vector < vector < int >> traffic(cl, vector < int > (n, 0));
+for (int i = perc + 1, a = 0; i < perc + 1 + cl; i++, a++) {
+for (int j = i, b = 0; j <= c; j += cl, b++)
+{
+traffic[a][b] = j;
+}
+}
+cout << "\nThe Traffic Channel Matrix:" << endl<<endl;
+for (int i = 0; i < traffic.size(); i++) {
+cout << "[ ";
+for (int j = 0; j < traffic[i].size(); j++)
+cout << traffic[i][j] << "\t";
+cout << "]\n";
+}
+cout<<endl<<endl;
+return 0;
+}
+
+
+
+
+
+
+
+Expt 3
+#include <bits/stdc++.h>
+using namespace std;
+void display(vector<int> cell_value) {
+for(int i=0; i<cell_value.size(); i++)
+cout<<cell_value[i]<<" ";
+}
+int sum(vector<int> cell_value) {
+int ans = 0;
+for(int num : cell_value)
+ans += num;
+return ans;
+}
+void subtraction(vector<int> &cell_value, int subtract) {
+for(int i=0; i<cell_value.size(); i++) {
+cell_value[i] -= subtract;
+}
+}
+int generate_random() {
+random_device rd;
+mt19937 gen(rd());
+uniform_int_distribution<> distrib(0, 5);
+int random_number = distrib(gen);
+return random_number;
+}
+int maximum(vector<int> arr) {
+int maxi = 0;
+for(int i=0; i<arr.size(); i++)
+maxi = max(maxi, arr[i]);
+return maxi;
+}
+void Build_traffic_matrix(vector<vector<int>> &traffic_matrix, vector<int>
+ cell_value, vector<int> low_priority, vector<int> high_priority) {
+int rows = traffic_matrix.size();
+int cols = traffic_matrix[0].size();
+int it1 = 0, it2 = 0;
+int high_size = high_priority.size();
+for(int i=0; i<cols; i++) {
+for(int j=0; j<rows; j++) {
+if(it1 == high_size) {
+if(j>=cell_value[i])
+traffic_matrix[j][i] = 0;
+else {
+traffic_matrix[j][i] = low_priority[it2];
+it2++;
+}
+}
+else {
+if(j>=cell_value[i])
+traffic_matrix[j][i] = 0;
+else {
+traffic_matrix[j][i] = high_priority[it1];
+it1++;
+}
+}
+}
+}
+}
+void displayMatrix(vector<vector<int>> traffic_matrix) {
+int rows = traffic_matrix.size();
+int cols = traffic_matrix[0].size();
+for(int i=0; i<rows; i++) {
+for(int j=0; j<cols; j++) {
+cout<<traffic_matrix[i][j]<<"\t";
+}
+cout<<endl;
+}
+}
+int main()
+{
+int channels, cluster_size;
+cout<<"Enter the number of total channels : ";
+cin>>channels;
+cout<<"Enter the cluster size : ";
+cin>>cluster_size;
+vector<int> cell_value(cluster_size);
+for(int i=0; i<cluster_size; i++) {
+cout<<"Enter the number of channels value : ";
+cin>>cell_value[i];
+}
+cout<<"The channel requirement list is : ";
+display(cell_value);
+cout<<endl;
+int overall_value = sum(cell_value);
+int excess_value = overall_value - 100;
+int subtract = excess_value/cluster_size;
+subtraction(cell_value, subtract);
+cout<<"The channel requirement list after adjustment is : ";
+display(cell_value);
+cout<<endl;
+unordered_map<int, int> mp;
+vector<int> low_priority, high_priority;
+for(int i=1; i<=100; i++) {
+int number = generate_random();
+mp[i] = number;
+if(number<=2)
+low_priority.push_back(i);
+else
+high_priority.push_back(i);
+}
+cout<<"The low priority channels are : ";
+display(low_priority);
+cout<<endl;
+cout<<"The high priority channels are : ";
+display(high_priority);
+cout<<endl;
+int rows = maximum(cell_value);
+vector<vector<int>> traffic_matrix(rows, vector<int> (cluster_size,
+ 0));
+Build_traffic_matrix(traffic_matrix, cell_value, low_priority,
+ high_priority);
+cout<<"Traffic matrix is : \n";
+displayMatrix(traffic_matrix);
+cout<<endl;
+return 0;
+}
+
+
+
+
+
+
+Expt4
+Part1
+1. Connect the Modem:
+ Connect the GSM modem to a serial port and use HyperTerminal to issue AT
+commands to the modem.
+2. Check Signal Strength:
+ Command: `AT+CSQ`
+ This command provides the signal strength of the GSM network. The output is a
+number pair, such as `11,99`. A signal strength value above 14 is generally
+considered good.
+ AT+CSQ
+
+3. Set SMS Mode (PDU or TEXT):
+ Command: `AT+CMGF=<mode>`
+ This command sets the SMS mode:
+ PDU mode: `0`
+ TEXT mode: `1`
+ AT+CMGF=1
+4. Read SMS from GSM Terminal:
+ Command: `AT+CMGL=<stat>` or `AT+CMGR=<index>`
+ This command reads SMS messages from the GSM terminal based on the
+message status:
+ `rec unread`: Unread messages
+ `rec read`: Read messages
+
+ AT+CMGL="rec unread"
+ AT+CMGL="rec read"
+
+5. Send SMS:
+ Command: `AT+CMGS=<da><toda><cr>`
+ This command is used to send an SMS:
+ `da`: Destination number
+ `toda`: Type of destination address (usually `145` for international format)
+ AT+CMGS="+919819134064",145<cr>
+ > Enter your message here
+
+ To send the message, press `CTRL+Z`.
+6. Delete SMS:
+ Command: `AT+CMGD=<index>`
+ This command deletes a specific message from the SIM based on its index
+number.
+
+ AT+CMGD=14
+
+
+
+
+Expt 4
+
+Part 2:
+Aim: Code Automation
+Code:
+import serial
+import time
+def send_at_command(command, serial_port, timeout=1):
+serial_port.write((command + '\r').encode())
+time.sleep(timeout)
+response = serial_port.read_all().decode()
+return response
+def main():
+port = 'COM5'
+baud_rate = 9600
+timeout = 5
+try:
+gsm_modem = serial.Serial(port, baud_rate, timeout=timeout)
+print(f"Connected to GSM modem on {port}")
+at_commands = [
+'AT',
+'AT+CSQ',
+'AT+CREG?',
+'AT+COPS?',
+'AT+CMGF=1',
+'AT+CMGS="+918275820062"',
+'Hello, this is a test message.' + chr(26)
+]
+for command in at_commands:
+response = send_at_command(command, gsm_modem)
+print(f"Command: {command}\nResponse: {response}\n")
+gsm_modem.close()
+except serial.SerialException as e:
+print(f"Error: {e}")
+if __name__ == '__main__':
+main()
+
+
+
+
+
+
+Expt7
+
+DSSS Without BPSK:
+% Parameters
+data = [1 0 0 1 0 1 0 0 1 1]; % Original data bits from the image
+chip_rate = 8; % Chip rate for spreading
+pn_seq = [1 -1 1 -1 -1 1 -1 1]; % Example pseudorandom sequence for spreading
+
+% Repeat the pseudorandom sequence to match the data length after spreading
+spread_length = length(data) * chip_rate;
+pn_seq = repmat(pn_seq, 1, ceil(spread_length / length(pn_seq))); 
+pn_seq = pn_seq(1:spread_length); % Trim to exact spread length
+
+% Spread the signal
+data_repeated = repelem(2*data - 1, chip_rate); % Repeat each bit and convert 0 -> -1, 1 -> 1
+spread_signal = data_repeated .* pn_seq; % DSSS without BPSK
+
+% Plotting
+figure;
+
+subplot(4, 1, 1);
+stairs(repelem(data, chip_rate), 'LineWidth', 1.5);
+title('Original Bit Sequence b(t)');
+xlabel('Samples');
+ylabel('Amplitude');
+ylim([-2 2]);
+grid on;
+
+subplot(4, 1, 2);
+stairs(pn_seq, 'LineWidth', 1.5);
+title('Pseudorandom Bit Sequence pr\_sig(t)');
+xlabel('Samples');
+ylabel('Amplitude');
+ylim([-2 2]);
+grid on;
+
+subplot(4, 1, 3);
+stairs(data_repeated .* pn_seq, 'LineWidth', 1.5);
+title('Multiplier Output Sequence b(t) * pr\_sig(t)');
+xlabel('Samples');
+ylabel('Amplitude');
+ylim([-2 2]);
+grid on;
+
+subplot(4, 1, 4);
+stairs(spread_signal, 'LineWidth', 1.5);
+title('DSSS Signal (Square Wave)');
+xlabel('Samples');
+ylabel('Amplitude');
+ylim([-1.5 1.5]);
+grid on;
+
+
+
+
+DSSS with BPSK:
+clc;
+clear;
+
+% Ensure the number of input bits is odd by randomly generating odd-length input
+num_bits = 9; % Specify the number of bits (ensure it's odd)
+if mod(num_bits, 2) == 0
+    error('Number of bits must be odd.');
+end
+
+% Generate random input bits (0 or 1) and convert to 1 and -1
+input_bits = randi([0 1], 1, num_bits); % Randomly generate binary input bits (0 or 1)
+
+% Generate random PN sequence (1 or -1)
+pn_sequence = randi([0 1], 1, num_bits);
+pn_sequence(pn_sequence == 0) = -1; % Convert 0s to -1 for PN sequence
+
+% Bit duration and sampling rate
+Tb = 1; % Bit duration
+fs = 100; % Sampling rate
+t = 0:1/fs:Tb-1/fs;
+
+% Generate the input signal waveform (convert bits to 1 or -1)
+input_signal = [];
+for i = 1:length(input_bits)
+    bit_value = 2*input_bits(i) - 1; % Convert binary 0/1 to -1/1
+    input_signal = [input_signal bit_value*ones(1, length(t))];
+end
+
+% Generate the PN sequence waveform (spread each PN bit over Tb)
+pn_signal = [];
+for i = 1:length(pn_sequence)
+    pn_signal = [pn_signal pn_sequence(i)*ones(1, length(t))];
+end
+
+% Multiply input signal by the PN sequence (Spreading)
+spread_signal = input_signal .* pn_signal;
+
+% BPSK modulation (using a carrier)
+fc = 5; % Carrier frequency
+bpsk_signal = spread_signal .* cos(2 * pi * fc * (0:1/fs:Tb*length(input_bits)-1/fs));
+
+% Plotting the results
+figure;
+
+subplot(5,1,1);
+plot(0:1/fs:Tb*length(input_bits)-1/fs, input_signal, 'LineWidth', 1.5);
+title('Input Signal');
+ylim([-1.5 1.5]);
+grid on;
+
+subplot(5,1,2);
+plot(0:1/fs:Tb*length(input_bits)-1/fs, pn_signal, 'LineWidth', 1.5);
+title('PN Sequence');
+ylim([-1.5 1.5]);
+grid on;
+
+subplot(5,1,3);
+plot(0:1/fs:Tb*length(input_bits)-1/fs, spread_signal, 'LineWidth', 1.5);
+title('Multiplied Signal (Spread Signal)');
+ylim([-1.5 1.5]);
+grid on;
+
+subplot(5,1,4);
+stairs(1:length(spread_signal), spread_signal, 'LineWidth', 1.5);
+title('Chip Sequence');
+xlim([0 length(spread_signal)]);
+grid on;
+
+subplot(5,1,5);
+plot(0:1/fs:Tb*length(input_bits)-1/fs, bpsk_signal, 'LineWidth', 1.5);
+title('BPSK Signal');
+grid on;
+
+
+
+
+
+
+
+
+
+Expt10
+Code:
+clc;
+close all;
+clear all;
+%%
+% Free Space Path Loss Model
+% Parameters
+c = 3e8; % Speed of light (m/s)
+f = 2e9; % Frequency (2 GHz)
+Pt = 30; % Transmit Power (in dB)
+d = 1:1000; % Distance range from 1m to 1000m
+% Calculate Path Loss
+L = 20*log10(d) + 20*log10(f) + 20*log10(4*pi/c);
+% Calculate Received Power (in dB)
+Pr = Pt - L;
+% Plot Path Loss vs Distance
+figure;
+subplot(2,1,1);
+plot(d, L);
+xlabel('Distance (m)');
+ylabel('Path Loss (dB)');
+title('Free Space Path Loss Model');
+grid on;
+% Plot Received Power vs Distance
+subplot(2,1,2);
+plot(d, Pr);
+xlabel('Distance (m)');
+ylabel('Received Power (dB)');
+title('Received Power vs Distance');
+grid on;
+%%
+% Okumura & Hata Model
+% Parameters
+f = 900; % Frequency in MHz
+ht = 30; % Height of Transmitting antenna (meters)
+hr = 1.5; % Height of Receiving antenna (meters)
+d = 1:100; % Distance range in kilometers
+% Basic Path Loss (similar to FSPL)
+L0 = 20*log10(d) + 20*log10(f) + 20*log10(4*pi/c);
+% Hata model correction terms
+a_hr = (1.1*log10(f)-0.7)*hr - (1.56*log10(f)-0.8);
+L_d_hata = 69.55 + 26.16*log10(f) - 13.82*log10(ht) - a_hr + (44.9 - 6.55*log10(ht)).*log10(d);
+% Plot Path Loss vs Distance for Hata
+figure;
+subplot(2,1,1);
+plot(d, L_d_hata);
+xlabel('Distance (km)');
+ylabel('Path Loss (dB)');
+title('Hata Model Path Loss');
+grid on;
+% Received Power in Hata Model (Assuming Pt = 30 dB)
+Pr_hata = Pt - L_d_hata;
+% Plot Received Power vs Distance for Hata
+subplot(2,1,2);
+plot(d, Pr_hata);
+xlabel('Distance (km)');
+ylabel('Received Power (dB)');
+title('Received Power vs Distance (Hata Model)');
+grid on;
+%%
+% Indoor Propagation (Log-Distance Model)
+% Parameters
+d0 = 1; % Reference distance (meters)
+L_d0 = 40; % Path loss at reference distance (dB)
+n = 3; % Path loss exponent
+d = 1:1000; % Distance range from 1m to 1000m
+% Calculate Path Loss using Log-Distance Model
+L_indoor = L_d0 + 10*n*log10(d/d0);
+% Plot Path Loss vs Distance for Indoor Model
+figure;
+subplot(2,1,1);
+plot(d, L_indoor);
+xlabel('Distance (m)');
+ylabel('Path Loss (dB)');
+title('Indoor Log-Distance Path Loss Model');
+grid on;
+% Received Power for Indoor (Assuming Pt = 30 dB)
+Pr_indoor = Pt - L_indoor;
+% Plot Received Power vs Distance for Indoor Model
+subplot(2,1,2);
+plot(d, Pr_indoor);
+xlabel('Distance (m)');
+ylabel('Received Power (dB)');
+title('Received Power vs Distance (Log-Distance Model)');
+grid on;
+
